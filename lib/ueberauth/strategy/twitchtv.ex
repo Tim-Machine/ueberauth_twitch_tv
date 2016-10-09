@@ -157,25 +157,17 @@ defmodule Ueberauth.Strategy.TwitchTv do
     user = conn.private.twitch_tv_user
 
     %Info{
+      type: user["type"],
       name: user["name"],
-      nickname: user["login"],
-      email: user["email"],
-      location: user["location"],
-      urls: %{
-        followers_url: user["followers_url"],
-        avatar_url: user["avatar_url"],
-        events_url: user["events_url"],
-        starred_url: user["starred_url"],
-        blog: user["blog"],
-        subscriptions_url: user["subscriptions_url"],
-        organizations_url: user["organizations_url"],
-        gists_url: user["gists_url"],
-        following_url: user["following_url"],
-        api_url: user["url"],
-        html_url: user["html_url"],
-        received_events_url: user["received_events_url"],
-        repos_url: user["repos_url"]
-      }
+      created_at: user["created_at"],
+      updated_at: user["updated_at"],
+      _links: %{
+        self: user["self"]
+      },
+      logo: user["logo"],
+      _id: user["_id"],
+      display_name: user["display_name"],
+      bio: user["bio"]
     }
   end
 
