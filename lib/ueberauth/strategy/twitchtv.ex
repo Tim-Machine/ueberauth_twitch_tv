@@ -157,17 +157,18 @@ defmodule Ueberauth.Strategy.TwitchTv do
     user = conn.private.twitch_tv_user
 
     %Info{
-      type: user["type"],
-      name: user["name"],
-      created_at: user["created_at"],
-      updated_at: user["updated_at"],
-      _links: %{
+      name: user["name"],  ## this is your display name
+      first_name: nil,
+      last_name: nil,
+      nickname: nil, 
+      email: user["email"], 
+      location: nil, 
+      description: user["bio"], 
+      image: user["logo"], 
+      phone: nil, 
+      urls: %{
         self: user["self"]
-      },
-      logo: user["logo"],
-      _id: user["_id"],
-      display_name: user["display_name"],
-      bio: user["bio"]
+      }
     }
   end
 
@@ -178,7 +179,8 @@ defmodule Ueberauth.Strategy.TwitchTv do
     %Extra {
       raw_info: %{
         token: conn.private.twitch_tv_token,
-        user: conn.private.twitch_tv_user
+        user: conn.private.twitch_tv_user,
+        is_partnered: user = conn.private.twitch_tv_user["partnered"]
       }
     }
   end
