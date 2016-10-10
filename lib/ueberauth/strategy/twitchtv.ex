@@ -187,7 +187,11 @@ defmodule Ueberauth.Strategy.TwitchTv do
 
   defp fetch_user(conn, token) do
     conn = put_private(conn, :twitch_tv_token, token)
-    case OAuth2.AccessToken.get(token, "/user") do
+
+    path = "https://api.twitch.tv/kraken/user"
+    resp = OAuth2.AccessToken.get(token, path)
+
+    case resp do
       { :ok, %OAuth2.Response{status_code: 401, body: _body}} ->
         set_errors!(conn, [error("token", "unauthorized")])
       { :ok, %OAuth2.Response{status_code: status_code, body: user} } when status_code in 200..399 ->
