@@ -190,7 +190,8 @@ defmodule Ueberauth.Strategy.TwitchTv do
 
     path = "https://api.twitch.tv/kraken/user"
     resp = OAuth2.AccessToken.get(token, path)
-
+    Logger.debug(resp)
+    
     case resp do
       { :ok, %OAuth2.Response{status_code: 401, body: _body}} ->
         set_errors!(conn, [error("token", "unauthorized")])
