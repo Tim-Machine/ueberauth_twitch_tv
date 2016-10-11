@@ -1,4 +1,5 @@
 defmodule Ueberauth.Strategy.TwitchTv do
+  require Logger
   @moduledoc """
   Provides an Ueberauth strategy for authenticating with Twitch.tv.
 
@@ -180,7 +181,7 @@ defmodule Ueberauth.Strategy.TwitchTv do
       raw_info: %{
         token: conn.private.twitch_tv_token,
         user: conn.private.twitch_tv_user,
-        is_partnered: user = conn.private.twitch_tv_user["partnered"]
+        is_partnered: conn.private.twitch_tv_user["partnered"]
       }
     }
   end
@@ -191,7 +192,7 @@ defmodule Ueberauth.Strategy.TwitchTv do
     path = "https://api.twitch.tv/kraken/user"
     resp = OAuth2.AccessToken.get(token, path)
     Logger.debug(resp)
-    
+
     case resp do
       { :ok, %OAuth2.Response{status_code: 401, body: _body}} ->
         set_errors!(conn, [error("token", "unauthorized")])
