@@ -36,7 +36,7 @@ defmodule Ueberauth.Strategy.TwitchTv do
     module = option(conn, :oauth2_module)
     token = apply(module, :get_token!, [[code: code]])
 
-    Logger.debug(conn)
+    Logger.debug(token)
 
     if token.access_token == nil do
       set_errors!(conn, [error(token.other_params["error"], token.other_params["error_description"])])
