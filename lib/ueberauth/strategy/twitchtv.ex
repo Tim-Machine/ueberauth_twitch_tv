@@ -1,76 +1,7 @@
 defmodule Ueberauth.Strategy.TwitchTv do
   require Logger
-  @moduledoc """
-  Provides an Ueberauth strategy for authenticating with Twitch.tv.
-
-  ### Setup
-
-  Create an application in Twitch.tv for you to use.
-
-  Register a new application at: [your Twitch.tv developer page](https://www.twitch.tv/kraken/oauth2/clients/new) and get the `client_id` and `client_secret`.
-
-  Include the provider in your configuration for Ueberauth
-
-      config :ueberauth, Ueberauth,
-        providers: [
-          twitchtv: { Ueberauth.Strategy.TwitchtTv, [] }
-        ]
-
-  Then include the configuration for twitchtv.
-
-      config :ueberauth, Ueberauth.Strategy.TwitchTv.OAuth,
-        client_id: System.get_env("TWITCH_TV_CLIENT_ID"),
-        client_secret: System.get_env("TWITCH_TV_CLIENT_SECRET")
-
-  If you haven't already, create a pipeline and setup routes for your callback handler
-
-      pipeline :auth do
-        Ueberauth.plug "/auth"
-      end
-
-      scope "/auth" do
-        pipe_through [:browser, :auth]
-
-        get "/:provider/callback", AuthController, :callback
-      end
-
-
-  Create an endpoint for the callback where you will handle the `Ueberauth.Auth` struct
-
-      defmodule MyApp.AuthController do
-        use MyApp.Web, :controller
-
-        def callback_phase(%{ assigns: %{ ueberauth_failure: fails } } = conn, _params) do
-          # do things with the failure
-        end
-
-        def callback_phase(%{ assigns: %{ ueberauth_auth: auth } } = conn, params) do
-          # do things with the auth
-        end
-      end
-
-  You can edit the behaviour of the Strategy by including some options when you register your provider.
-
-  To set the `uid_field`
-
-      config :ueberauth, Ueberauth,
-        providers: [
-          twitchtv: { Ueberauth.Strategy.TwitchtTv, [uid_field: :email] }
-        ]
-
-  Default is `:login`
-
-  To set the default 'scopes' (permissions):
-
-      config :ueberauth, Ueberauth,
-        providers: [
-          twitchtv: { Ueberauth.Strategy.TwitchtTv, [default_scope: "user,public_repo"] }
-        ]
-
-  Deafult is "user,public_repo"
-  """
   use Ueberauth.Strategy, uid_field: :login,
-                          default_scope: "user,public_repo",
+                          default_scope: "user_read",
                           oauth2_module: Ueberauth.Strategy.TwitchTv.OAuth
 
   alias Ueberauth.Auth.Info
@@ -104,6 +35,8 @@ defmodule Ueberauth.Strategy.TwitchTv do
   def handle_callback!(%Plug.Conn{ params: %{ "code" => code } } = conn) do
     module = option(conn, :oauth2_module)
     token = apply(module, :get_token!, [[code: code]])
+
+    Logger.debug(conn)
 
     if token.access_token == nil do
       set_errors!(conn, [error(token.other_params["error"], token.other_params["error_description"])])
