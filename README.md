@@ -10,7 +10,7 @@
 
     ```elixir
     def deps do
-      [{:ueberauth_twitch_tv, "~> 0.4"}]
+      [{:ueberauth_twitch_tv, "~> 0.2.0"}]
     end
     ```
 

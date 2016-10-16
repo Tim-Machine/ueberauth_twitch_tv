@@ -102,7 +102,7 @@ defmodule Ueberauth.Strategy.TwitchTv do
   """
   def handle_callback!(%Plug.Conn{ params: %{ "code" => code } } = conn) do
     module = option(conn, :oauth2_module)
-    token = apply(module, :get_token!, [[code: code]])
+    token = apply(module, :get_token!, [[code: code, redirect_uri: callback_url(conn)  ]])
 
     if token.access_token == nil do
       set_errors!(conn, [error(token.other_params["error"], token.other_params["error_description"])])
@@ -137,8 +137,8 @@ defmodule Ueberauth.Strategy.TwitchTv do
   """
   def credentials(conn) do
     token = conn.private.twitch_tv_token
-    scopes = (token.other_params["scope"] || "")
-    |> String.split(",")
+    # scopes = (token.other_params["scope"] || "")
+    # |> String.split(",")
 
     %Credentials{
       token: token.access_token,
@@ -146,7 +146,7 @@ defmodule Ueberauth.Strategy.TwitchTv do
       expires_at: token.expires_at,
       token_type: token.token_type,
       expires: !!token.expires_at,
-      scopes: scopes
+      # scopes: scopes
     }
   end
 
@@ -180,14 +180,18 @@ defmodule Ueberauth.Strategy.TwitchTv do
       raw_info: %{
         token: conn.private.twitch_tv_token,
         user: conn.private.twitch_tv_user,
-        is_partnered: user = conn.private.twitch_tv_user["partnered"]
+        is_partnered: conn.private.twitch_tv_user["partnered"]
       }
     }
   end
 
   defp fetch_user(conn, token) do
     conn = put_private(conn, :twitch_tv_token, token)
-    case OAuth2.AccessToken.get(token, "/user") do
+    path = "https://api.twitch.tv/kraken/user"
+    headers = [Authorization: "OAuth #{token.access_token}"]
+    resp = OAuth2.AccessToken.get(token, path, headers)
+
+    case resp do
       { :ok, %OAuth2.Response{status_code: 401, body: _body}} ->
         set_errors!(conn, [error("token", "unauthorized")])
       { :ok, %OAuth2.Response{status_code: status_code, body: user} } when status_code in 200..399 ->
