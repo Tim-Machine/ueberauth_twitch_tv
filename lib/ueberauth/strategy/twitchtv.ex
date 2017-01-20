@@ -176,11 +176,14 @@ defmodule Ueberauth.Strategy.TwitchTv do
   Stores the raw information (including the token) obtained from the Twitch Tv callback.
   """
   def extra(conn) do
+    user = conn.private.twitch_tv_user
+
     %Extra {
       raw_info: %{
         token: conn.private.twitch_tv_token,
-        user: conn.private.twitch_tv_user,
-        is_partnered: conn.private.twitch_tv_user["partnered"]
+        user: user,
+        is_partnered: user["partnered"],
+        email_verified: user["email_verified"]
       }
     }
   end
@@ -188,7 +191,7 @@ defmodule Ueberauth.Strategy.TwitchTv do
   defp fetch_user(conn, token) do
     conn = put_private(conn, :twitch_tv_token, token)
     path = "https://api.twitch.tv/kraken/user"
-    headers = [Authorization: "OAuth #{token.access_token}"]
+    headers = [Authorization: "OAuth #{token.access_token}", Accept: "application/vnd.twitchtv.v5+json"]
     resp = OAuth2.AccessToken.get(token, path, headers)
 
     case resp do
